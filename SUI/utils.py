@@ -28,24 +28,48 @@ def is_valid_address(address):
 
 def check_gas_balance():
     """
-    Проверяет баланс gas object из .env файла
+    Проверяет баланс gas object из .env файла через RPC-запрос
     """
     gas_object = os.getenv("GAS_OBJECT")
     if not gas_object:
         print("GAS_OBJECT not found in .env file.")
         return
 
+    url = "https://fullnode.mainnet.sui.io:443"
+    headers = {"Content-Type": "application/json"}
+    additional_params = {
+        "showType": True,
+        "showOwner": True,
+        "showPreviousTransaction": True,
+        "showDisplay": False,
+        "showContent": True,
+        "showBcs": False,
+        "showStorageRebate": True
+    }
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "sui_getObject",
+        "params": [gas_object, additional_params]
+    }
+
     try:
-        balance = check_object_balance(gas_object)
-        if balance > 0:
-            formatted_balance = balance / 1_000_000_000  # SUI has 9 decimals
-            print("\nGas Object Balance:")
-            print("-" * 50)
-            print(f"Object ID: {gas_object}")
-            print(f"Balance: {format_number(formatted_balance)} SUI")
-            print("-" * 50)
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        if response.status_code == 200:
+            data = response.json().get('result', {}).get('data', {})
+            obj_type = data.get('type', '')
+            if obj_type.startswith("0x2::coin::Coin<0x2::sui::SUI>"):
+                balance = int(data.get('content', {}).get('fields', {}).get('balance', 0))
+                formatted_balance = balance / 1_000_000_000
+                print("\nGas Object Balance:")
+                print("-" * 50)
+                print(f"Object ID: {gas_object}")
+                print(f"Balance: {format_number(formatted_balance)} SUI")
+                print("-" * 50)
+            else:
+                print(f"Object {gas_object} is not a SUI Coin object.")
         else:
-            print(f"Error: Could not get balance for gas object {gas_object}")
+            print(f"Error fetching object info from the API. Status code: {response.status_code}")
     except Exception as e:
         print(f"Error checking gas balance: {str(e)}")
 
