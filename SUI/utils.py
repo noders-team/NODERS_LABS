@@ -83,8 +83,8 @@ def get_token_balances():
                 coin_type = balance.get('coinType', 'Unknown')
                 total_balance = int(balance.get('totalBalance', 0))
                 
-                # Показываем только SUI токены
-                if "sui::SUI" in coin_type:
+                # Показываем только токены типа 0x2::sui::SUI
+                if coin_type == "0x2::sui::SUI":
                     formatted_balance = total_balance / 1_000_000_000  # SUI has 9 decimals
                     print(f"Token: SUI")
                     print(f"Type: {coin_type}")
