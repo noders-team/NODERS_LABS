@@ -48,7 +48,7 @@ def request_address():
     Requests the Sui address from the user and saves it to the .env file.
     """
     address = input("Please enter the Sui address: ")
-    set_key(".env", "RECEPIENT_ADDRESS", address)
+    set_key(".env", "RECIPIENT_ADDRESS", address)
     return address
 
 def get_object_info(object_id):
@@ -104,7 +104,7 @@ def get_reward_information():
     """
     Gets reward information for a given Sui address and processes each object ID.
     """
-    address = os.getenv("RECEPIENT_ADDRESS") or request_address()
+    address = os.getenv("RECIPIENT_ADDRESS") or request_address()
     owned_objects = get_owned_objects(address)
     if owned_objects:
         object_ids = [obj['data']['objectId'] for obj in owned_objects['result']['data']]
