@@ -126,26 +126,37 @@ def get_reward_information():
         print("No data to save")
 
 def send_rewards_to_address():
-    # Загрузка списка объектов для отправки
-    try:
-        with open("reward_for_send.txt", "r") as file:
-            object_ids = [line.strip() for line in file if line.strip()]
-    except FileNotFoundError:
-        print("File reward_for_send.txt not found.")
-        return
-
     recipient_address = os.getenv("RECIPIENT_ADDRESS")
     if not recipient_address:
         print("RECIPIENT_ADDRESS not found in .env file.")
         return
 
-    if not object_ids:
-        print("No objects to send.")
+    address = os.getenv("SUI_ADDRESS")
+    if not address:
+        print("SUI_ADDRESS not found in .env file.")
+        return
+
+    # Получаем все объекты с типом и балансом
+    objects = get_all_objects_with_type_and_balance(address)
+    # Фильтруем только SUI Coin с балансом > 5 SUI
+    filtered = [obj for obj in objects if obj['type'] == "0x2::coin::Coin<0x2::sui::SUI>" and obj['balance'] is not None and obj['balance'] > 5_000_000_000]
+
+    if not filtered:
+        print("No suitable SUI Coin objects with balance > 5 SUI to send.")
+        return
+
+    total_balance = sum(obj['balance'] for obj in filtered) / 1_000_000_000
+    print(f"\nReady to send {len(filtered)} SUI Coin objects.")
+    print(f"Total balance to send: {format_number(total_balance)} SUI")
+    print(f"Recipient address: {recipient_address}")
+    confirm = input("Proceed with sending? (y/n): ").strip().lower()
+    if confirm != 'y':
+        print("Operation cancelled by user.")
         return
 
     sent_objects = []
-    # Отправка каждого объекта и обновление списка
-    for object_id in object_ids:
+    for obj in filtered:
+        object_id = obj['objectId']
         time.sleep(5)
         gas_object = os.getenv("GAS_OBJECT", "0x0eaef11be6a00b414cac2de32ace7286162845a9d6d013fc2cd53d665c35a85e")
         command = f"sui client transfer --to {recipient_address} --object-id {object_id} --gas-budget 199800000 --gas {gas_object}"
@@ -163,10 +174,6 @@ def send_rewards_to_address():
                 print(f"Error: Failed to retrieve transaction digest for object ID {object_id}.")
         except subprocess.CalledProcessError as e:
             print(f"Error executing command for object ID {object_id}: {e.output}")
-
-    # Очистка файла после отправки всех объектов
-    with open("reward_for_send.txt", "w") as file:
-        pass
 
     if sent_objects:
         print(f"All rewards have been sent. Total sent: {len(sent_objects)}")
