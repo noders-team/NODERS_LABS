@@ -2,7 +2,7 @@ import re
 import subprocess
 import requests
 import json
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 import os
 from tabulate import tabulate
 
@@ -27,9 +27,21 @@ def is_valid_address(address):
         return True
     return False
 
+def replace_gas_object_cli():
+    """
+    Replace GAS_OBJECT in .env via CLI
+    """
+    new_gas_object = input("Enter new GAS OBJECT (object id): ").strip()
+    if not (new_gas_object.startswith("0x") and len(new_gas_object) >= 10):
+        print("Invalid object id format. Must start with 0x and be a valid SUI object id.")
+        return
+    set_key(".env", "GAS_OBJECT", new_gas_object)
+    print(f"GAS_OBJECT successfully updated to: {new_gas_object}")
+
 def check_gas_balance():
     """
     Checks the balance of the gas object from .env file via RPC and displays it in a nice format (English output)
+    If balance < 0.1 SUI, offers to replace GAS_OBJECT automatically.
     """
     gas_object = os.getenv("GAS_OBJECT")
     if not gas_object:
@@ -65,6 +77,12 @@ def check_gas_balance():
                 table = [[gas_object, formatted_balance]]
                 print("Gas Object Balance:")
                 print(tabulate(table, headers=["Gas Object ID", "Balance (SUI)"], tablefmt="grid", numalign="right", stralign="left"))
+                # Check if balance is less than 0.1 SUI
+                if (balance / 1_000_000_000) < 0.1:
+                    print("\nWarning: Your GAS OBJECT balance is less than 0.1 SUI!")
+                    answer = input("Would you like to replace GAS OBJECT now? (y/n): ").strip().lower()
+                    if answer == 'y':
+                        replace_gas_object_cli()
             else:
                 print(f"Object {gas_object} is not a SUI Coin object.")
         else:
