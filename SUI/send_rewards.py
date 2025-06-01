@@ -173,3 +173,60 @@ def send_rewards_to_address():
             print(f"- {obj}")
     else:
         print("No objects were sent.")
+
+def get_all_objects_with_type_and_balance(address):
+    """
+    Получает все объекты на адресе и определяет их type и balance (если есть).
+    Возвращает список словарей: {'objectId', 'type', 'balance'}
+    """
+    url = "https://fullnode.mainnet.sui.io:443"
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "suix_getOwnedObjects",
+        "params": [address]
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    if response.status_code != 200:
+        print("Error fetching data from the API")
+        return []
+    owned_objects = response.json().get('result', {}).get('data', [])
+    result = []
+    for obj in owned_objects:
+        object_id = obj['data']['objectId']
+        # Получаем подробную инфу по объекту
+        obj_info_url = "https://fullnode.mainnet.sui.io:443"
+        obj_info_payload = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "sui_getObject",
+            "params": [object_id, {
+                "showType": True,
+                "showOwner": True,
+                "showPreviousTransaction": True,
+                "showDisplay": False,
+                "showContent": True,
+                "showBcs": False,
+                "showStorageRebate": True
+            }]
+        }
+        obj_info_resp = requests.post(obj_info_url, headers=headers, data=json.dumps(obj_info_payload))
+        if obj_info_resp.status_code == 200:
+            data = obj_info_resp.json().get('result', {}).get('data', {})
+            obj_type = data.get('type', None)
+            balance = None
+            if obj_type and obj_type.startswith("0x2::coin::Coin<0x2::sui::SUI>"):
+                balance = int(data.get('content', {}).get('fields', {}).get('balance', 0))
+            result.append({
+                'objectId': object_id,
+                'type': obj_type,
+                'balance': balance
+            })
+        else:
+            result.append({
+                'objectId': object_id,
+                'type': None,
+                'balance': None
+            })
+    return result
