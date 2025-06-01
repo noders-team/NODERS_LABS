@@ -23,6 +23,7 @@ def main_menu():
         print("[4] Vote for Gas Price")
         print("[5] Show SUI Token Balance")
         print("[6] Show Gas Object Balance")
+        print("[7] Show All Objects (type & balance)")
         print("[0] Exit")
         print("-" * 50)
         choice = input("Please enter your choice: ")
@@ -39,6 +40,8 @@ def main_menu():
             utils.get_token_balances()
         elif choice == "6":
             utils.check_gas_balance()
+        elif choice == "7":
+            send_rewards.print_all_objects_info(utils.os.getenv("SUI_ADDRESS"))
         elif choice == "0":
             print("Goodbye!")
             break
