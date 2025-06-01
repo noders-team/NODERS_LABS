@@ -4,6 +4,7 @@ import requests
 import json
 from dotenv import load_dotenv
 import os
+from tabulate import tabulate
 
 load_dotenv()
 
@@ -61,16 +62,9 @@ def check_gas_balance():
             if obj_type.startswith("0x2::coin::Coin<0x2::sui::SUI>"):
                 balance = int(data.get('content', {}).get('fields', {}).get('balance', 0))
                 formatted_balance = format_number(balance / 1_000_000_000)
-                # Table formatting
-                id_col = 66
-                balance_col = 18
-                sep = f"+{'-'*id_col}+{'-'*balance_col}+"
+                table = [[gas_object, formatted_balance]]
                 print("Gas Object Balance:")
-                print(sep)
-                print(f"| {'Gas Object ID':<{id_col}}| {'Balance (SUI)':>{balance_col}}|")
-                print(sep)
-                print(f"| {gas_object:<{id_col}}| {formatted_balance:>{balance_col}}|")
-                print(sep)
+                print(tabulate(table, headers=["Gas Object ID", "Balance (SUI)"], tablefmt="grid", numalign="right", stralign="left"))
             else:
                 print(f"Object {gas_object} is not a SUI Coin object.")
         else:
@@ -104,22 +98,18 @@ def get_token_balances():
                 print("No tokens found for this address.")
                 return
 
-            # Table formatting
-            token_col = 10
-            type_col = 40
-            balance_col = 18
-            sep = f"+{'-'*token_col}+{'-'*type_col}+{'-'*balance_col}+"
-            print("SUI Token Balance:")
-            print(sep)
-            print(f"| {'Token':<{token_col}}| {'Type':<{type_col}}| {'Balance (SUI)':>{balance_col}}|")
-            print(sep)
+            table = []
             for balance in balances:
                 coin_type = balance.get('coinType', 'Unknown')
                 total_balance = int(balance.get('totalBalance', 0))
                 if coin_type == "0x2::sui::SUI":
                     formatted_balance = format_number(total_balance / 1_000_000_000)
-                    print(f"| {'SUI':<{token_col}}| {coin_type:<{type_col}}| {formatted_balance:>{balance_col}}|")
-            print(sep)
+                    table.append(["SUI", coin_type, formatted_balance])
+            if table:
+                print("SUI Token Balance:")
+                print(tabulate(table, headers=["Token", "Type", "Balance (SUI)"], tablefmt="grid", numalign="right", stralign="left"))
+            else:
+                print("No SUI tokens found for this address.")
         else:
             print("Error fetching balances from the API.")
     except Exception as e:
