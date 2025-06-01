@@ -5,6 +5,7 @@ import subprocess
 import requests
 import time
 from dotenv import load_dotenv, set_key
+from utils import format_number
 
 load_dotenv()
 
