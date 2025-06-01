@@ -61,12 +61,16 @@ def check_gas_balance():
             if obj_type.startswith("0x2::coin::Coin<0x2::sui::SUI>"):
                 balance = int(data.get('content', {}).get('fields', {}).get('balance', 0))
                 formatted_balance = format_number(balance / 1_000_000_000)
+                # Table formatting
+                id_col = 66
+                balance_col = 18
+                sep = f"+{'-'*id_col}+{'-'*balance_col}+"
                 print("Gas Object Balance:")
-                print("+---------------------------------------------------------------+")
-                print("| Gas Object ID                                               | Balance (SUI) |")
-                print("+---------------------------------------------------------------+")
-                print(f"| {gas_object:<59} | {formatted_balance:>12} |")
-                print("+---------------------------------------------------------------+")
+                print(sep)
+                print(f"| {'Gas Object ID':<{id_col}}| {'Balance (SUI)':>{balance_col}}|")
+                print(sep)
+                print(f"| {gas_object:<{id_col}}| {formatted_balance:>{balance_col}}|")
+                print(sep)
             else:
                 print(f"Object {gas_object} is not a SUI Coin object.")
         else:
@@ -100,17 +104,22 @@ def get_token_balances():
                 print("No tokens found for this address.")
                 return
 
+            # Table formatting
+            token_col = 10
+            type_col = 40
+            balance_col = 18
+            sep = f"+{'-'*token_col}+{'-'*type_col}+{'-'*balance_col}+"
             print("SUI Token Balance:")
-            print("+----------------------+---------------------------+-------------------+")
-            print("| Token               | Type                      | Balance (SUI)     |")
-            print("+----------------------+---------------------------+-------------------+")
+            print(sep)
+            print(f"| {'Token':<{token_col}}| {'Type':<{type_col}}| {'Balance (SUI)':>{balance_col}}|")
+            print(sep)
             for balance in balances:
                 coin_type = balance.get('coinType', 'Unknown')
                 total_balance = int(balance.get('totalBalance', 0))
                 if coin_type == "0x2::sui::SUI":
                     formatted_balance = format_number(total_balance / 1_000_000_000)
-                    print(f"| {'SUI':<20} | {coin_type:<25} | {formatted_balance:>15} |")
-            print("+----------------------+---------------------------+-------------------+")
+                    print(f"| {'SUI':<{token_col}}| {coin_type:<{type_col}}| {formatted_balance:>{balance_col}}|")
+            print(sep)
         else:
             print("Error fetching balances from the API.")
     except Exception as e:
