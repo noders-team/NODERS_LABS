@@ -51,7 +51,7 @@ def check_gas_balance():
 
 def get_token_balances():
     """
-    Получает и отображает баланс всех токенов на адресе в удобном формате
+    Получает и отображает баланс SUI токенов на адресе в удобном формате
     """
     address = os.getenv("SUI_ADDRESS")
     if not address:
@@ -83,18 +83,13 @@ def get_token_balances():
                 coin_type = balance.get('coinType', 'Unknown')
                 total_balance = int(balance.get('totalBalance', 0))
                 
-                # Форматируем баланс в зависимости от типа токена
+                # Показываем только SUI токены
                 if "sui::SUI" in coin_type:
                     formatted_balance = total_balance / 1_000_000_000  # SUI has 9 decimals
-                    symbol = "SUI"
-                else:
-                    formatted_balance = total_balance
-                    symbol = coin_type.split("::")[-1]
-
-                print(f"Token: {symbol}")
-                print(f"Type: {coin_type}")
-                print(f"Balance: {format_number(formatted_balance)}")
-                print("-" * 50)
+                    print(f"Token: SUI")
+                    print(f"Type: {coin_type}")
+                    print(f"Balance: {format_number(formatted_balance)}")
+                    print("-" * 50)
 
         else:
             print("Error fetching balances from the API")
