@@ -128,23 +128,26 @@ def send_rewards_to_address():
         print("RECIPIENT_ADDRESS not found in .env file.")
         return
 
+    if not object_ids:
+        print("No objects to send.")
+        return
+
+    sent_objects = []
     # Отправка каждого объекта и обновление списка
     for object_id in object_ids:
         time.sleep(5)
-
         gas_object = os.getenv("GAS_OBJECT", "0x0eaef11be6a00b414cac2de32ace7286162845a9d6d013fc2cd53d665c35a85e")
         command = f"sui client transfer --to {recipient_address} --object-id {object_id} --gas-budget 199800000 --gas {gas_object}"
         print(f"Sending object {object_id} to {recipient_address}...")
-
         try:
             command_output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, universal_newlines=True)
             digest_line = re.search(r'Transaction Digest:\s+(\S+)', command_output)
             if digest_line:
                 digest = digest_line.group(1)
                 print(f"Transaction Digest: {digest}")
-
                 with open("transaction_digest.txt", "a") as f:
                     f.write(f"{digest}\n")
+                sent_objects.append(object_id)
             else:
                 print(f"Error: Failed to retrieve transaction digest for object ID {object_id}.")
         except subprocess.CalledProcessError as e:
@@ -154,4 +157,10 @@ def send_rewards_to_address():
     with open("reward_for_send.txt", "w") as file:
         pass
 
-    print("All rewards have been sent.")
+    if sent_objects:
+        print(f"All rewards have been sent. Total sent: {len(sent_objects)}")
+        print("Sent object IDs:")
+        for obj in sent_objects:
+            print(f"- {obj}")
+    else:
+        print("No objects were sent.")
