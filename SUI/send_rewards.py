@@ -230,3 +230,16 @@ def get_all_objects_with_type_and_balance(address):
                 'balance': None
             })
     return result
+
+def print_all_objects_info(address):
+    objects = get_all_objects_with_type_and_balance(address)
+    print("\nAll objects on address:")
+    print("+------------------------------------------+-----------------------------------------------+-----------------+")
+    print("| Object ID                                | Type                                          | Balance (SUI)   |")
+    print("+------------------------------------------+-----------------------------------------------+-----------------+")
+    for obj in objects:
+        obj_id = obj['objectId']
+        obj_type = obj['type'] if obj['type'] else "Unknown"
+        balance = format_number(obj['balance'] / 1_000_000_000) if obj['balance'] is not None else "-"
+        print(f"| {obj_id:<40} | {obj_type:<45} | {balance:>13}   |")
+    print("+------------------------------------------+-----------------------------------------------+-----------------+")

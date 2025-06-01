@@ -4,6 +4,9 @@ import send_rewards
 import vote_for_gas
 import utils
 
+# Пример вызова функции для вывода всех объектов с типом и балансом:
+# send_rewards.print_all_objects_info(utils.os.getenv("SUI_ADDRESS"))
+
 def main_menu():
     print("=" * 50)
     print("Welcome to the SUI Node Utility CLI!\n")
