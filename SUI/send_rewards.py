@@ -86,15 +86,24 @@ def get_object_info(object_id):
 def filter_and_save_object_ids(filename="reward_for_send.txt"):
     """
     Reads object IDs from a file, filters them based on their type and balance, and saves the filtered IDs back to the file.
+    Также выводит информацию о найденных объектах и их балансах.
     """
     with open(filename, 'r') as file:
         object_ids = [line.strip() for line in file.readlines()]
 
     filtered_object_ids = []
+    print("Objects found for sending (after filtering):")
+    print("+------------------------------------------+-----------------+")
+    print("| Object ID                                | Balance (SUI)   |")
+    print("+------------------------------------------+-----------------+")
     for object_id in object_ids:
         object_info, balance = get_object_info(object_id)
         if object_info and object_info.get('type') == "0x2::coin::Coin<0x2::sui::SUI>" and balance > 5000000000:
             filtered_object_ids.append(object_id)
+            print(f"| {object_id:<40} | {format_number(balance / 1_000_000_000):>13}   |")
+    print("+------------------------------------------+-----------------+")
+    if not filtered_object_ids:
+        print("No suitable objects found for sending.")
 
     with open(filename, 'w') as file:
         for object_id in filtered_object_ids:
