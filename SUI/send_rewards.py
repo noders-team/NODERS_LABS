@@ -6,6 +6,7 @@ import requests
 import time
 from dotenv import load_dotenv, set_key
 from utils import format_number
+from tabulate import tabulate
 
 load_dotenv()
 
@@ -234,13 +235,19 @@ def get_all_objects_with_type_and_balance(address):
 
 def print_all_objects_info(address):
     objects = get_all_objects_with_type_and_balance(address)
-    print("\nAll objects on address:")
-    print("+------------------------------------------+-----------------------------------------------+-----------------+")
-    print("| Object ID                                | Type                                          | Balance (SUI)   |")
-    print("+------------------------------------------+-----------------------------------------------+-----------------+")
+    table = []
     for obj in objects:
         obj_id = obj['objectId']
         obj_type = obj['type'] if obj['type'] else "Unknown"
+        if obj_type and len(obj_type) > 40:
+            obj_type = obj_type[:37] + "..."
         balance = format_number(obj['balance'] / 1_000_000_000) if obj['balance'] is not None else "-"
-        print(f"| {obj_id:<40} | {obj_type:<45} | {balance:>13}   |")
-    print("+------------------------------------------+-----------------------------------------------+-----------------+")
+        table.append([obj_id, obj_type, balance])
+    print("\nAll objects on address:")
+    print(tabulate(
+        table,
+        headers=["Object ID", "Type", "Balance (SUI)"],
+        tablefmt="grid",
+        numalign="right",
+        stralign="left"
+    ))
