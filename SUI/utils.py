@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 def format_number(number):
-    return "{:,.2f}".format(number)
+    return "{:,.4f}".format(number)
 
 def check_object_balance(object_id):
     command_output = subprocess.check_output(f"sui client object {object_id}", shell=True, stderr=subprocess.DEVNULL, universal_newlines=True)
@@ -28,7 +28,7 @@ def is_valid_address(address):
 
 def check_gas_balance():
     """
-    Проверяет баланс gas object из .env файла через RPC-запрос
+    Checks the balance of the gas object from .env file via RPC and displays it in a nice format (English output)
     """
     gas_object = os.getenv("GAS_OBJECT")
     if not gas_object:
@@ -60,12 +60,13 @@ def check_gas_balance():
             obj_type = data.get('type', '')
             if obj_type.startswith("0x2::coin::Coin<0x2::sui::SUI>"):
                 balance = int(data.get('content', {}).get('fields', {}).get('balance', 0))
-                formatted_balance = balance / 1_000_000_000
-                print("\nGas Object Balance:")
-                print("-" * 50)
-                print(f"Object ID: {gas_object}")
-                print(f"Balance: {format_number(formatted_balance)} SUI")
-                print("-" * 50)
+                formatted_balance = format_number(balance / 1_000_000_000)
+                print("Gas Object Balance:")
+                print("+---------------------------------------------------------------+")
+                print("| Gas Object ID                                               | Balance (SUI) |")
+                print("+---------------------------------------------------------------+")
+                print(f"| {gas_object:<59} | {formatted_balance:>12} |")
+                print("+---------------------------------------------------------------+")
             else:
                 print(f"Object {gas_object} is not a SUI Coin object.")
         else:
@@ -75,7 +76,7 @@ def check_gas_balance():
 
 def get_token_balances():
     """
-    Получает и отображает баланс SUI токенов на адресе в удобном формате
+    Gets and displays the SUI token balance for the address in a nice table format (English output)
     """
     address = os.getenv("SUI_ADDRESS")
     if not address:
@@ -95,27 +96,22 @@ def get_token_balances():
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         if response.status_code == 200:
             balances = response.json().get('result', [])
-            
             if not balances:
-                print("No tokens found on this address.")
+                print("No tokens found for this address.")
                 return
 
-            print("\nToken Balances:")
-            print("-" * 50)
-            
+            print("SUI Token Balance:")
+            print("+----------------------+---------------------------+-------------------+")
+            print("| Token               | Type                      | Balance (SUI)     |")
+            print("+----------------------+---------------------------+-------------------+")
             for balance in balances:
                 coin_type = balance.get('coinType', 'Unknown')
                 total_balance = int(balance.get('totalBalance', 0))
-                
-                # Показываем только токены типа 0x2::sui::SUI
                 if coin_type == "0x2::sui::SUI":
-                    formatted_balance = total_balance / 1_000_000_000  # SUI has 9 decimals
-                    print(f"Token: SUI")
-                    print(f"Type: {coin_type}")
-                    print(f"Balance: {format_number(formatted_balance)}")
-                    print("-" * 50)
-
+                    formatted_balance = format_number(total_balance / 1_000_000_000)
+                    print(f"| {'SUI':<20} | {coin_type:<25} | {formatted_balance:>15} |")
+            print("+----------------------+---------------------------+-------------------+")
         else:
-            print("Error fetching balances from the API")
+            print("Error fetching balances from the API.")
     except Exception as e:
         print(f"Error: {str(e)}")

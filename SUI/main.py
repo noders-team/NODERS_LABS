@@ -5,20 +5,24 @@ import vote_for_gas
 import utils
 
 def main_menu():
-    print("\n--- Актуальный баланс ---")
+    print("=" * 50)
+    print("Welcome to the SUI Node Utility CLI!\n")
+    print("Your current balances:")
+    print("-" * 50)
     utils.get_token_balances()
     utils.check_gas_balance()
+    print("=" * 50)
     while True:
         print("\nMain Menu:")
-        print("1. Get Reward Information")
-        print("2. Claim Rewards")
-        print("3. Send Rewards to Address")
-        print("4. Vote for Gas Price")
-        print("5. Show Token Balances")
-        print("6. Check Gas Object Balance")
-        print("0. Exit")
-
-        choice = input("Enter your choice: ")
+        print("[1] Get Reward Information")
+        print("[2] Claim Rewards")
+        print("[3] Send Rewards to Address")
+        print("[4] Vote for Gas Price")
+        print("[5] Show SUI Token Balance")
+        print("[6] Show Gas Object Balance")
+        print("[0] Exit")
+        print("-" * 50)
+        choice = input("Please enter your choice: ")
 
         if choice == "1":
             reward_information.get_reward_information()
@@ -33,6 +37,7 @@ def main_menu():
         elif choice == "6":
             utils.check_gas_balance()
         elif choice == "0":
+            print("Goodbye!")
             break
         else:
             print("Invalid choice. Please try again.")
