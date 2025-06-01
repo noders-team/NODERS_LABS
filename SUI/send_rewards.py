@@ -235,15 +235,19 @@ def get_all_objects_with_type_and_balance(address):
 
 def print_all_objects_info(address):
     objects = get_all_objects_with_type_and_balance(address)
+    # Оставляем только объекты с балансом (Coin<SUI>)
+    filtered = [obj for obj in objects if obj['balance'] is not None]
+    # Сортируем по балансу по убыванию
+    filtered.sort(key=lambda x: x['balance'], reverse=True)
     table = []
-    for obj in objects:
+    for obj in filtered:
         obj_id = obj['objectId']
         obj_type = obj['type'] if obj['type'] else "Unknown"
         if obj_type and len(obj_type) > 40:
             obj_type = obj_type[:37] + "..."
-        balance = format_number(obj['balance'] / 1_000_000_000) if obj['balance'] is not None else "-"
+        balance = format_number(obj['balance'] / 1_000_000_000)
         table.append([obj_id, obj_type, balance])
-    print("\nAll objects on address:")
+    print("\nAll SUI Coin objects on address (sorted by balance):")
     print(tabulate(
         table,
         headers=["Object ID", "Type", "Balance (SUI)"],
