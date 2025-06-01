@@ -5,6 +5,9 @@ import vote_for_gas
 import utils
 
 def main_menu():
+    print("\n--- Актуальный баланс ---")
+    utils.get_token_balances()
+    utils.check_gas_balance()
     while True:
         print("\nMain Menu:")
         print("1. Get Reward Information")
