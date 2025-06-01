@@ -57,8 +57,6 @@ def check_gas_balance():
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         if response.status_code == 200:
             data = response.json().get('result', {}).get('data', {})
-            print("DEBUG: Полный ответ объекта:")
-            print(json.dumps(data, indent=2, ensure_ascii=False))
             obj_type = data.get('type', '')
             if obj_type.startswith("0x2::coin::Coin<0x2::sui::SUI>"):
                 balance = int(data.get('content', {}).get('fields', {}).get('balance', 0))
