@@ -8,14 +8,32 @@ from tabulate import tabulate
 
 load_dotenv()
 
+# Глобальная переменная для хранения выбранной сети в памяти
+_selected_network = None
+
 def get_network_rpc_url():
     """
     Получает RPC URL для выбранной сети из переменной окружения или запрашивает выбор сети
     """
+    global _selected_network
+    
+    # Если сеть уже выбрана в памяти, используем её
+    if _selected_network:
+        if _selected_network.lower() == "testnet":
+            return "https://fullnode.testnet.sui.io:443"
+        elif _selected_network.lower() == "mainnet":
+            return "https://fullnode.mainnet.sui.io:443"
+        else:
+            return "https://fullnode.mainnet.sui.io:443"
+    
+    # Проверяем переменную окружения
     network = os.getenv("SUI_NETWORK")
     if not network:
         network = select_network()
         set_key(".env", "SUI_NETWORK", network)
+    
+    # Сохраняем в памяти
+    _selected_network = network
     
     if network.lower() == "testnet":
         return "https://fullnode.testnet.sui.io:443"
@@ -41,6 +59,16 @@ def select_network():
             return "testnet"
         else:
             print("Неверный выбор. Пожалуйста, введите 1 или 2.")
+
+def change_network():
+    """
+    Смена сети с обновлением как в .env, так и в памяти
+    """
+    global _selected_network
+    new_network = select_network()
+    set_key(".env", "SUI_NETWORK", new_network)
+    _selected_network = new_network
+    return new_network
 
 def format_number(number):
     return "{:,.4f}".format(number)

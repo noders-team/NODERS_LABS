@@ -52,8 +52,7 @@ def main_menu():
             send_rewards.print_all_objects_info(os.getenv("SUI_ADDRESS"))
         elif choice == "8":
             # Смена сети
-            new_network = utils.select_network()
-            utils.set_key(".env", "SUI_NETWORK", new_network)
+            new_network = utils.change_network()
             print(f"Сеть изменена на: {new_network}")
         elif choice == "0":
             print("Goodbye!")
