@@ -45,24 +45,24 @@ def get_network_rpc_url():
 
 def select_network():
     """
-    Запрашивает у пользователя выбор сети
+    Requests network selection from user
     """
-    print("\nВыберите сеть:")
+    print("\nSelect network:")
     print("[1] Mainnet")
     print("[2] Testnet")
     
     while True:
-        choice = input("Введите ваш выбор (1 или 2): ").strip()
+        choice = input("Enter your choice (1 or 2): ").strip()
         if choice == "1":
             return "mainnet"
         elif choice == "2":
             return "testnet"
         else:
-            print("Неверный выбор. Пожалуйста, введите 1 или 2.")
+            print("Invalid choice. Please enter 1 or 2.")
 
 def change_network():
     """
-    Смена сети с обновлением как в .env, так и в памяти
+    Change network with update both in .env and memory
     """
     global _selected_network
     new_network = select_network()
@@ -93,12 +93,19 @@ def replace_gas_object_cli():
     """
     Replace GAS_OBJECT in .env via CLI
     """
-    new_gas_object = input("Enter new GAS OBJECT (object id): ").strip()
+    print("\n=== SET GAS OBJECT ===")
+    print("Enter the gas object ID that will be used for transactions.")
+    print("This object must be a SUI coin with sufficient balance.")
+    print("-" * 40)
+    
+    new_gas_object = input("Enter gas object ID: ").strip()
     if not (new_gas_object.startswith("0x") and len(new_gas_object) >= 10):
-        print("Invalid object id format. Must start with 0x and be a valid SUI object id.")
+        print("Invalid object ID format. Must start with 0x and be a valid SUI object ID.")
         return
+    
     set_key(".env", "GAS_OBJECT", new_gas_object)
-    print(f"GAS_OBJECT successfully updated to: {new_gas_object}")
+    print(f"Gas object successfully updated to: {new_gas_object}")
+    print("You can verify the gas object balance in the Balance menu.")
 
 def check_gas_balance():
     """
@@ -141,8 +148,9 @@ def check_gas_balance():
                 print(tabulate(table, headers=["Gas Object ID", "Balance (SUI)"], tablefmt="grid", numalign="right", stralign="left"))
                 # Check if balance is less than 0.1 SUI
                 if (balance / 1_000_000_000) < 0.1:
-                    print("\nWarning: Your GAS OBJECT balance is less than 0.1 SUI!")
-                    answer = input("Would you like to replace GAS OBJECT now? (y/n): ").strip().lower()
+                    print("\n⚠️  Warning: Your gas object balance is less than 0.1 SUI!")
+                    print("This may cause transaction failures.")
+                    answer = input("Would you like to set a new gas object now? (y/n): ").strip().lower()
                     if answer == 'y':
                         replace_gas_object_cli()
             else:

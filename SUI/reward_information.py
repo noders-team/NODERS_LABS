@@ -94,12 +94,28 @@ def get_reward_information():
     """
     Gets reward information for a given Sui address and processes each object ID.
     """
+    print("\n=== GETTING REWARD INFORMATION ===")
     address = os.getenv("SUI_ADDRESS") or request_address()
+    
+    print(f"Checking rewards for address: {address}")
+    print("Fetching objects from network...")
+    
     owned_objects = get_owned_objects(address)
     if owned_objects:
         object_ids = [obj['data']['objectId'] for obj in owned_objects['result']['data']]
+        print(f"Found {len(object_ids)} total objects")
+        
         save_object_ids_to_file(object_ids)
+        print("Filtering for staking rewards...")
         filter_and_save_object_ids()
-        print("Filtered object IDs saved to object_id.txt")
+        
+        # Count filtered objects
+        try:
+            with open("object_id.txt", "r") as f:
+                filtered_count = len([line.strip() for line in f if line.strip()])
+            print(f"✅ Found {filtered_count} claimable reward objects")
+            print("Reward object IDs saved to object_id.txt")
+        except FileNotFoundError:
+            print("No claimable rewards found")
     else:
-        print("No data to save")
+        print("❌ Error: No objects found or failed to fetch data")

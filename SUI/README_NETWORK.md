@@ -1,72 +1,137 @@
-# Выбор сети в SUI Node Utility CLI
+# SUI Node Utility CLI - Network Selection & Menu Structure
 
-## Обзор
+## Overview
 
-Добавлена возможность выбора между сетями **Mainnet** и **Testnet** при использовании SUI Node Utility CLI.
+The SUI Node Utility CLI now supports network selection between **Mainnet** and **Testnet**, and features a new organized menu structure with main menus and submenus.
 
-## Как это работает
+## Network Selection
 
-### Автоматический выбор сети
-При первом запуске любого скрипта, который использует RPC вызовы, система автоматически запросит выбор сети:
+### Automatic Network Selection
+When you first run any script that uses RPC calls, the system will automatically request network selection:
 
 ```
-Выберите сеть:
+Select network:
 [1] Mainnet
 [2] Testnet
-Введите ваш выбор (1 или 2):
+Enter your choice (1 or 2):
 ```
 
-### Сохранение выбора
-Выбранная сеть сохраняется в файл `.env` в переменной `SUI_NETWORK`:
-- `mainnet` - для основной сети
-- `testnet` - для тестовой сети
+### Saving Selection
+The selected network is saved in the `.env` file in the `SUI_NETWORK` variable:
+- `mainnet` - for main network
+- `testnet` - for test network
 
 ### RPC URL
-В зависимости от выбранной сети используются следующие RPC URL:
+Depending on the selected network, the following RPC URLs are used:
 - **Mainnet**: `https://fullnode.mainnet.sui.io:443`
 - **Testnet**: `https://fullnode.testnet.sui.io:443`
 
-## Использование
+## Menu Structure
 
-### 1. Через главное меню
-В главном меню добавлена опция для смены сети:
+### Main Menu
 ```
-[8] Change Network
-```
-
-### 2. Автоматический запрос
-При первом запуске система автоматически запросит выбор сети.
-
-### 3. Просмотр текущей сети
-В главном меню отображается текущая выбранная сеть:
-```
-Текущая сеть: mainnet
+=== MAIN MENU ===
+[1] Rewards
+[2] Gas
+[3] Balance
+[4] Change Network
+[0] Exit
 ```
 
-## Обновленные файлы
+### Rewards Submenu
+```
+=== REWARDS MENU ===
+[1] Get reward list from wallet
+[2] Show rewards on wallet
+[3] Claim rewards
+[4] Send rewards
+[0] Back to main menu
+```
 
-Следующие файлы были обновлены для поддержки выбора сети:
+#### Send Rewards Options
+```
+=== SEND REWARDS ===
+[1] Use permanent withdrawal address
+[2] Enter custom address
+[0] Back to rewards menu
+```
 
-- `utils.py` - добавлены функции `get_network_rpc_url()` и `select_network()`
-- `send_rewards.py` - обновлен для использования выбранной сети
-- `reward_information.py` - обновлен для использования выбранной сети
-- `main.py` - добавлена опция смены сети в меню
+### Gas Submenu
+```
+=== GAS MENU ===
+[1] Vote for gas price
+[2] Set gas object
+[3] Show suitable tokens for gas object
+[0] Back to main menu
+```
 
-## Тестирование
+### Balance Submenu
+```
+=== BALANCE MENU ===
+[1] Show tokens on address
+[2] Show claimable rewards amount
+[0] Back to main menu
+```
 
-Для тестирования функциональности выбора сети используйте:
+## Features
+
+### Rewards Management
+- **Get reward list**: Fetches and filters staking rewards from your wallet
+- **Show rewards**: Displays current rewards on your wallet
+- **Claim rewards**: Withdraw individual or all available rewards
+- **Send rewards**: Transfer rewards to permanent or custom addresses
+
+### Gas Management
+- **Vote for gas price**: Submit gas price votes for the next epoch
+- **Set gas object**: Configure which SUI token to use for gas fees
+- **Show suitable tokens**: Display all SUI tokens that can be used as gas objects
+
+### Balance Information
+- **Show tokens**: Display all token balances on your address
+- **Show claimable rewards**: Count and display available rewards for withdrawal
+
+## Usage
+
+### Starting the Application
 ```bash
-python test_network.py
+python main.py
 ```
 
-## Переменные окружения
+### Testing Network Selection
+```bash
+python test_fix.py
+```
 
-В файле `.env` теперь используется переменная:
-- `SUI_NETWORK` - выбранная сеть (`mainnet` или `testnet`)
+### Testing Menu Structure
+```bash
+python test_menu.py
+```
 
-## Примечания
+## Environment Variables
 
-- При смене сети все последующие RPC вызовы будут использовать новый URL
-- Выбор сети сохраняется между запусками программы
-- Если переменная `SUI_NETWORK` не установлена, система запросит выбор сети
-- При некорректном значении сети используется mainnet по умолчанию 
+The following variables are used in the `.env` file:
+- `SUI_NETWORK` - selected network (`mainnet` or `testnet`)
+- `SUI_ADDRESS` - your SUI wallet address
+- `RECIPIENT_ADDRESS` - permanent withdrawal address
+- `GAS_OBJECT` - gas object ID for transactions
+- `OBJECT_CAP_ID` - validator object capability ID for gas voting
+
+## Updated Files
+
+The following files have been updated for network support and new menu structure:
+
+- `utils.py` - added network selection functions and improved gas object management
+- `main.py` - completely restructured with new menu system
+- `send_rewards.py` - updated to use selected network
+- `reward_information.py` - updated to use selected network and improved display
+- `claim_rewards.py` - improved user interface and error handling
+- `vote_for_gas.py` - enhanced user interface and validation
+
+## Notes
+
+- Network selection is requested only once per session
+- Network choice is saved between program runs
+- If `SUI_NETWORK` variable is not set, the system will request network selection
+- Invalid network values default to mainnet
+- All menus and messages are now in English
+- Improved error handling and user feedback throughout the application 
