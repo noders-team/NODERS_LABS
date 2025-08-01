@@ -2,6 +2,7 @@ import requests
 import json
 from dotenv import load_dotenv, set_key
 import os
+import utils
 
 # Load environment variables from .env file
 load_dotenv()
@@ -10,7 +11,7 @@ def get_owned_objects(address):
     """
     Fetches all objects owned by a given address from the Sui network.
     """
-    url = "https://fullnode.mainnet.sui.io:443"
+    url = utils.get_network_rpc_url()
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -47,7 +48,7 @@ def get_object_info(object_id):
     Fetches detailed information about a specific object from the Sui network using sui_getObject.
     Includes additional parameters to retrieve more details about the object.
     """
-    url = "https://fullnode.mainnet.sui.io:443"
+    url = utils.get_network_rpc_url()
     headers = {"Content-Type": "application/json"}
     additional_params = {
         "showType": True,

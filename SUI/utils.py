@@ -8,6 +8,40 @@ from tabulate import tabulate
 
 load_dotenv()
 
+def get_network_rpc_url():
+    """
+    Получает RPC URL для выбранной сети из переменной окружения или запрашивает выбор сети
+    """
+    network = os.getenv("SUI_NETWORK")
+    if not network:
+        network = select_network()
+        set_key(".env", "SUI_NETWORK", network)
+    
+    if network.lower() == "testnet":
+        return "https://fullnode.testnet.sui.io:443"
+    elif network.lower() == "mainnet":
+        return "https://fullnode.mainnet.sui.io:443"
+    else:
+        print(f"Неизвестная сеть: {network}. Используется mainnet по умолчанию.")
+        return "https://fullnode.mainnet.sui.io:443"
+
+def select_network():
+    """
+    Запрашивает у пользователя выбор сети
+    """
+    print("\nВыберите сеть:")
+    print("[1] Mainnet")
+    print("[2] Testnet")
+    
+    while True:
+        choice = input("Введите ваш выбор (1 или 2): ").strip()
+        if choice == "1":
+            return "mainnet"
+        elif choice == "2":
+            return "testnet"
+        else:
+            print("Неверный выбор. Пожалуйста, введите 1 или 2.")
+
 def format_number(number):
     return "{:,.4f}".format(number)
 
@@ -48,7 +82,7 @@ def check_gas_balance():
         print("GAS_OBJECT not found in .env file.")
         return
 
-    url = "https://fullnode.mainnet.sui.io:443"
+    url = get_network_rpc_url()
     headers = {"Content-Type": "application/json"}
     additional_params = {
         "showType": True,
@@ -99,7 +133,7 @@ def get_token_balances():
         print("SUI_ADDRESS not found in .env file.")
         return
 
-    url = "https://fullnode.mainnet.sui.io:443"
+    url = get_network_rpc_url()
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",

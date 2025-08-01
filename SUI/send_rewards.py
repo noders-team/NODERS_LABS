@@ -5,6 +5,7 @@ import subprocess
 import requests
 import time
 from dotenv import load_dotenv, set_key
+import utils
 from utils import format_number
 from tabulate import tabulate
 
@@ -19,7 +20,7 @@ def get_owned_objects(address):
     """
     Fetches all objects owned by a given address from the Sui network.
     """
-    url = "https://fullnode.mainnet.sui.io:443"
+    url = utils.get_network_rpc_url()
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -48,7 +49,7 @@ def get_object_info(object_id):
     Fetches detailed information about a specific object from the Sui network using sui_getObject.
     Includes additional parameters to retrieve more details about the object.
     """
-    url = "https://fullnode.mainnet.sui.io:443"
+    url = utils.get_network_rpc_url()
     headers = {"Content-Type": "application/json"}
     additional_params = {
         "showType": True,
@@ -150,7 +151,7 @@ def get_all_objects_with_type_and_balance(address):
     Получает все объекты на адресе и определяет их type и balance (если есть).
     Возвращает список словарей: {'objectId', 'type', 'balance'}
     """
-    url = "https://fullnode.mainnet.sui.io:443"
+    url = utils.get_network_rpc_url()
     headers = {"Content-Type": "application/json"}
     payload = {
         "jsonrpc": "2.0",
@@ -167,7 +168,7 @@ def get_all_objects_with_type_and_balance(address):
     for obj in owned_objects:
         object_id = obj['data']['objectId']
         # Получаем подробную инфу по объекту
-        obj_info_url = "https://fullnode.mainnet.sui.io:443"
+        obj_info_url = utils.get_network_rpc_url()
         obj_info_payload = {
             "jsonrpc": "2.0",
             "id": 1,

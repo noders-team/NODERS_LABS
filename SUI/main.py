@@ -1,3 +1,4 @@
+import os
 import reward_information
 import claim_rewards
 import send_rewards
@@ -10,6 +11,12 @@ import utils
 def main_menu():
     print("=" * 50)
     print("Welcome to the SUI Node Utility CLI!\n")
+    
+    # Показываем текущую сеть
+    network = os.getenv("SUI_NETWORK", "не выбрана")
+    print(f"Текущая сеть: {network}")
+    print("-" * 50)
+    
     print("Your current balances:")
     print("-" * 50)
     utils.get_token_balances()
@@ -24,6 +31,7 @@ def main_menu():
         print("[5] Show SUI Token Balance")
         print("[6] Show Gas Object Balance")
         print("[7] Show All Objects (type & balance)")
+        print("[8] Change Network")
         print("[0] Exit")
         print("-" * 50)
         choice = input("Please enter your choice: ")
@@ -41,7 +49,12 @@ def main_menu():
         elif choice == "6":
             utils.check_gas_balance()
         elif choice == "7":
-            send_rewards.print_all_objects_info(utils.os.getenv("SUI_ADDRESS"))
+            send_rewards.print_all_objects_info(os.getenv("SUI_ADDRESS"))
+        elif choice == "8":
+            # Смена сети
+            new_network = utils.select_network()
+            utils.set_key(".env", "SUI_NETWORK", new_network)
+            print(f"Сеть изменена на: {new_network}")
         elif choice == "0":
             print("Goodbye!")
             break
