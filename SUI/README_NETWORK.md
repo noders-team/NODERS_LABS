@@ -78,7 +78,7 @@ Depending on the selected network, the following RPC URLs are used:
 ### Rewards Management
 - **Get reward list**: Fetches and filters staking rewards from your wallet, saves to file
 - **Show rewards**: Displays detailed information about all staking rewards on your wallet
-- **Claim rewards**: Withdraw individual or all available rewards
+- **Claim rewards**: Withdraw individual or all available rewards (with automatic gas object detection)
 - **Send rewards**: Transfer rewards to permanent or custom addresses
 
 ### Gas Management
@@ -112,6 +112,11 @@ python test_menu.py
 python test_rewards_display.py
 ```
 
+### Testing Gas Object Fix
+```bash
+python test_gas_object_fix.py
+```
+
 ## Environment Variables
 
 The following variables are used in the `.env` file:
@@ -129,7 +134,7 @@ The following files have been updated for network support and new menu structure
 - `main.py` - completely restructured with new menu system
 - `send_rewards.py` - updated to use selected network
 - `reward_information.py` - updated to use selected network and improved display
-- `claim_rewards.py` - improved user interface and error handling
+- `claim_rewards.py` - improved user interface, error handling, and automatic gas object detection
 - `vote_for_gas.py` - enhanced user interface and validation
 
 ## Notes
