@@ -101,8 +101,18 @@ def send_rewards_to_address():
 
     # Получаем все объекты с типом и балансом
     objects = get_all_objects_with_type_and_balance(address)
-    # Фильтруем только SUI Coin с балансом > 5 SUI
-    filtered = [obj for obj in objects if obj['type'] == "0x2::coin::Coin<0x2::sui::SUI>" and obj['balance'] is not None and obj['balance'] > 5_000_000_000]
+    
+    # Получаем газовый объект для исключения
+    gas_object = os.getenv("GAS_OBJECT")
+    
+    # Фильтруем только SUI Coin с балансом > 5 SUI, исключая газовый объект
+    filtered = []
+    for obj in objects:
+        if (obj['type'] == "0x2::coin::Coin<0x2::sui::SUI>" and 
+            obj['balance'] is not None and 
+            obj['balance'] > 5_000_000_000 and
+            obj['objectId'] != gas_object):
+            filtered.append(obj)
 
     if not filtered:
         print("No suitable SUI Coin objects with balance > 5 SUI to send.")

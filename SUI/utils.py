@@ -103,9 +103,46 @@ def replace_gas_object_cli():
         print("Invalid object ID format. Must start with 0x and be a valid SUI object ID.")
         return
     
-    set_key(".env", "GAS_OBJECT", new_gas_object)
-    print(f"Gas object successfully updated to: {new_gas_object}")
-    print("You can verify the gas object balance in the Balance menu.")
+    # Verify that the object exists and is a SUI coin
+    print("Verifying gas object...")
+    url = get_network_rpc_url()
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "sui_getObject",
+        "params": [new_gas_object, {
+            "showType": True,
+            "showOwner": True,
+            "showPreviousTransaction": True,
+            "showDisplay": False,
+            "showContent": True,
+            "showBcs": False,
+            "showStorageRebate": True
+        }]
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        if response.status_code == 200:
+            data = response.json().get('result', {}).get('data', {})
+            obj_type = data.get('type', '')
+            
+            if obj_type.startswith("0x2::coin::Coin<0x2::sui::SUI>"):
+                balance = int(data.get('content', {}).get('fields', {}).get('balance', 0))
+                formatted_balance = format_number(balance / 1_000_000_000)
+                
+                set_key(".env", "GAS_OBJECT", new_gas_object)
+                print(f"✅ Gas object successfully updated to: {new_gas_object}")
+                print(f"💰 Balance: {formatted_balance} SUI")
+                print("This object will be used for all transactions and excluded from reward sending.")
+            else:
+                print("❌ Error: The specified object is not a SUI coin.")
+                print(f"Object type: {obj_type}")
+        else:
+            print("❌ Error: Failed to verify gas object. Please check the object ID.")
+    except Exception as e:
+        print(f"❌ Error verifying gas object: {str(e)}")
 
 def check_gas_balance():
     """

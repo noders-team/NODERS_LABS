@@ -35,10 +35,11 @@ def claim_rewards():
     reward_id_input = input("\nEnter your choice: ").strip()
 
     def process_withdrawal(reward_id):
-        # Get a suitable gas object
-        gas_object = get_suitable_gas_object()
+        # Use the gas object from .env
+        gas_object = os.getenv("GAS_OBJECT")
         if not gas_object:
-            print(f"  ❌ Error: No suitable gas object found for transaction")
+            print(f"  ❌ Error: GAS_OBJECT not found in .env file")
+            print(f"  Please set a gas object in the Gas menu first")
             return False
             
         command = f"sui client call --package 0x3 --module sui_system --function request_withdraw_stake --args 0x5 {reward_id} --gas-budget 199800000 --gas {gas_object}"
@@ -62,51 +63,7 @@ def claim_rewards():
             print(f"  ❌ Error executing command: {e.output}")
             return False
 
-def get_suitable_gas_object():
-    """
-    Find a suitable gas object with sufficient balance
-    """
-    address = os.getenv("SUI_ADDRESS")
-    if not address:
-        print("SUI_ADDRESS not found in .env file.")
-        return None
-    
-    # Get all objects and find SUI coins with sufficient balance
-    owned_objects = reward_information.get_owned_objects(address)
-    if not owned_objects or 'result' not in owned_objects or 'data' not in owned_objects['result']:
-        return None
-    
-    suitable_objects = []
-    for obj in owned_objects['result']['data']:
-        object_id = obj['data']['objectId']
-        obj_info = reward_information.get_object_info(object_id)
-        
-        if obj_info and obj_info.get('result', {}).get('data', {}).get('type') == "0x2::coin::Coin<0x2::sui::SUI>":
-            # Get balance
-            obj_data = obj_info.get('result', {}).get('data', {})
-            content = obj_data.get('content', {})
-            fields = content.get('fields', {})
-            
-            if 'balance' in fields:
-                balance = int(fields['balance'])
-                # Check if balance is sufficient (at least 0.1 SUI)
-                if balance >= 100_000_000:  # 0.1 SUI in MIST
-                    suitable_objects.append({
-                        'object_id': object_id,
-                        'balance': balance
-                    })
-    
-    if suitable_objects:
-        # Sort by balance (highest first) and return the first one
-        suitable_objects.sort(key=lambda x: x['balance'], reverse=True)
-        selected_object = suitable_objects[0]['object_id']
-        
-        # Update the gas object in .env for future use
-        utils.set_key(".env", "GAS_OBJECT", selected_object)
-        
-        return selected_object
-    
-    return None
+
 
     if reward_id_input.lower() == "all":
         print(f"\nClaiming all {len(reward_ids)} rewards...")

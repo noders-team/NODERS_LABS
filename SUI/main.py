@@ -81,6 +81,17 @@ def gas_menu():
     """Gas submenu"""
     while True:
         print("\n=== GAS MENU ===")
+        
+        # Show current gas object and balance
+        gas_object = os.getenv("GAS_OBJECT")
+        if gas_object:
+            print(f"Current gas object: {gas_object}")
+            # Show gas object balance
+            utils.check_gas_balance()
+        else:
+            print("No gas object set")
+        
+        print("-" * 40)
         print("[1] Vote for gas price")
         print("[2] Set gas object")
         print("[3] Show suitable tokens for gas object")
@@ -107,12 +118,37 @@ def show_suitable_gas_tokens():
         print("SUI_ADDRESS not found in .env file.")
         return
     
+    current_gas_object = os.getenv("GAS_OBJECT")
+    
     print("\n=== SUITABLE GAS TOKENS ===")
+    if current_gas_object:
+        print(f"Current gas object: {current_gas_object}")
+        print("(marked with ⭐)")
     print("Showing SUI tokens that can be used as gas object:")
     print("-" * 40)
     
-    # Use the existing function to show all objects
-    send_rewards.print_all_objects_info(address)
+    # Get all objects and filter for SUI coins
+    objects = send_rewards.get_all_objects_with_type_and_balance(address)
+    sui_objects = [obj for obj in objects if obj['type'] == "0x2::coin::Coin<0x2::sui::SUI>" and obj['balance'] is not None]
+    
+    if sui_objects:
+        # Sort by balance
+        sui_objects.sort(key=lambda x: x['balance'], reverse=True)
+        
+        print(f"Found {len(sui_objects)} SUI coin objects:")
+        print("-" * 80)
+        
+        for i, obj in enumerate(sui_objects, 1):
+            obj_id = obj['objectId']
+            balance = utils.format_number(obj['balance'] / 1_000_000_000)
+            
+            # Mark current gas object
+            if obj_id == current_gas_object:
+                print(f"{i:2d}. ⭐ {obj_id} - {balance} SUI (CURRENT)")
+            else:
+                print(f"{i:2d}.    {obj_id} - {balance} SUI")
+    else:
+        print("No SUI coin objects found.")
 
 def balance_menu():
     """Balance submenu"""
