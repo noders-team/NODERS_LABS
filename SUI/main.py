@@ -40,8 +40,7 @@ def rewards_menu():
         if choice == "1":
             reward_information.get_reward_information()
         elif choice == "2":
-            # Show rewards on wallet (same as option 1 for now)
-            reward_information.get_reward_information()
+            show_rewards_details()
         elif choice == "3":
             claim_rewards.claim_rewards()
         elif choice == "4":
@@ -135,6 +134,68 @@ def balance_menu():
         else:
             print("Invalid choice. Please try again.")
 
+def show_rewards_details():
+    """Show detailed information about rewards on wallet"""
+    address = os.getenv("SUI_ADDRESS")
+    if not address:
+        print("SUI_ADDRESS not found in .env file.")
+        return
+    
+    print("\n=== REWARDS ON WALLET ===")
+    print("Fetching detailed reward information...")
+    
+    # Get owned objects and filter for StakedSui
+    owned_objects = reward_information.get_owned_objects(address)
+    if owned_objects and 'result' in owned_objects and 'data' in owned_objects['result']:
+        staked_objects = []
+        print(f"\nAnalyzing {len(owned_objects['result']['data'])} objects...")
+        
+        for i, obj in enumerate(owned_objects['result']['data'], 1):
+            object_id = obj['data']['objectId']
+            print(f"  Checking object {i}/{len(owned_objects['result']['data'])}: {object_id[:20]}...")
+            
+            obj_info = reward_information.get_object_info(object_id)
+            if obj_info and obj_info.get('result', {}).get('data', {}).get('type') == "0x3::staking_pool::StakedSui":
+                staked_objects.append({
+                    'object_id': object_id,
+                    'info': obj_info
+                })
+        
+        if staked_objects:
+            print(f"\n✅ Found {len(staked_objects)} staking reward objects:")
+            print("-" * 80)
+            
+            for i, reward in enumerate(staked_objects, 1):
+                obj_id = reward['object_id']
+                obj_data = reward['info'].get('result', {}).get('data', {})
+                
+                print(f"\n{i}. Reward Object ID: {obj_id}")
+                print(f"   Type: {obj_data.get('type', 'Unknown')}")
+                
+                # Try to get additional details if available
+                content = obj_data.get('content', {})
+                fields = content.get('fields', {})
+                
+                if 'principal' in fields:
+                    principal = int(fields['principal']) / 1_000_000_000
+                    print(f"   Principal: {utils.format_number(principal)} SUI")
+                
+                if 'sui_token_lock' in fields:
+                    lock = fields['sui_token_lock']
+                    print(f"   Token Lock: {lock}")
+                
+                if 'validator_address' in fields:
+                    validator = fields['validator_address']
+                    print(f"   Validator: {validator}")
+                
+                print(f"   Owner: {obj_data.get('owner', 'Unknown')}")
+                
+        else:
+            print("\n❌ No staking rewards found on this wallet.")
+            print("This wallet doesn't have any staked SUI tokens.")
+    else:
+        print("❌ Error fetching objects or no objects found.")
+
 def show_claimable_rewards():
     """Show amount of rewards that can be claimed"""
     address = os.getenv("SUI_ADDRESS")
@@ -142,27 +203,47 @@ def show_claimable_rewards():
         print("SUI_ADDRESS not found in .env file.")
         return
     
-    print("\n=== CLAIMABLE REWARDS ===")
+    print("\n=== CLAIMABLE REWARDS SUMMARY ===")
     print("Checking for claimable rewards...")
     
     # Get owned objects and filter for StakedSui
     owned_objects = reward_information.get_owned_objects(address)
     if owned_objects and 'result' in owned_objects and 'data' in owned_objects['result']:
         staked_objects = []
+        total_principal = 0
+        
+        print(f"\nAnalyzing {len(owned_objects['result']['data'])} objects for staking rewards...")
+        
         for obj in owned_objects['result']['data']:
             object_id = obj['data']['objectId']
             obj_info = reward_information.get_object_info(object_id)
             if obj_info and obj_info.get('result', {}).get('data', {}).get('type') == "0x3::staking_pool::StakedSui":
                 staked_objects.append(object_id)
+                
+                # Calculate total principal
+                obj_data = obj_info.get('result', {}).get('data', {})
+                content = obj_data.get('content', {})
+                fields = content.get('fields', {})
+                
+                if 'principal' in fields:
+                    principal = int(fields['principal'])
+                    total_principal += principal
         
         if staked_objects:
-            print(f"Found {len(staked_objects)} claimable reward objects:")
-            for obj_id in staked_objects:
-                print(f"  - {obj_id}")
+            total_sui = total_principal / 1_000_000_000
+            print(f"\n✅ Found {len(staked_objects)} claimable reward objects")
+            print(f"📊 Total staked amount: {utils.format_number(total_sui)} SUI")
+            print(f"💰 Estimated rewards: Available for withdrawal")
+            print("\nReward object IDs:")
+            for i, obj_id in enumerate(staked_objects, 1):
+                print(f"  {i}. {obj_id}")
+            
+            print(f"\n💡 Use 'Claim rewards' option to withdraw these rewards")
         else:
-            print("No claimable rewards found.")
+            print("\n❌ No claimable rewards found.")
+            print("This wallet doesn't have any staked SUI tokens.")
     else:
-        print("Error fetching objects or no objects found.")
+        print("❌ Error fetching objects or no objects found.")
 
 def main_menu():
     """Main menu with submenus"""

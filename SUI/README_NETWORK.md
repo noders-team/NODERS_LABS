@@ -76,8 +76,8 @@ Depending on the selected network, the following RPC URLs are used:
 ## Features
 
 ### Rewards Management
-- **Get reward list**: Fetches and filters staking rewards from your wallet
-- **Show rewards**: Displays current rewards on your wallet
+- **Get reward list**: Fetches and filters staking rewards from your wallet, saves to file
+- **Show rewards**: Displays detailed information about all staking rewards on your wallet
 - **Claim rewards**: Withdraw individual or all available rewards
 - **Send rewards**: Transfer rewards to permanent or custom addresses
 
@@ -88,7 +88,7 @@ Depending on the selected network, the following RPC URLs are used:
 
 ### Balance Information
 - **Show tokens**: Display all token balances on your address
-- **Show claimable rewards**: Count and display available rewards for withdrawal
+- **Show claimable rewards**: Count and display summary of available rewards for withdrawal
 
 ## Usage
 
@@ -105,6 +105,11 @@ python test_fix.py
 ### Testing Menu Structure
 ```bash
 python test_menu.py
+```
+
+### Testing Rewards Display
+```bash
+python test_rewards_display.py
 ```
 
 ## Environment Variables
