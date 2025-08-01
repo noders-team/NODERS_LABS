@@ -1,4 +1,6 @@
 import os
+import requests
+import json
 import reward_information
 import claim_rewards
 import send_rewards
@@ -18,10 +20,66 @@ def show_current_status():
     print(f"Current network: {network}")
     print("-" * 50)
     
-    print("Your current balances:")
+    # Get total SUI balance
+    address = os.getenv("SUI_ADDRESS")
+    total_balance = 0
+    gas_balance = 0
+    
+    if address:
+        url = utils.get_network_rpc_url()
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "suix_getAllBalances",
+            "params": [address]
+        }
+        
+        try:
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            if response.status_code == 200:
+                balances = response.json().get('result', [])
+                for balance in balances:
+                    coin_type = balance.get('coinType', '')
+                    if coin_type == "0x2::sui::SUI":
+                        total_balance = int(balance.get('totalBalance', 0)) / 1_000_000_000
+                        break
+        except:
+            pass
+    
+    # Get gas object balance
+    gas_object = os.getenv("GAS_OBJECT")
+    if gas_object:
+        url = utils.get_network_rpc_url()
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "sui_getObject",
+            "params": [gas_object, {
+                "showType": True,
+                "showOwner": True,
+                "showPreviousTransaction": True,
+                "showDisplay": False,
+                "showContent": True,
+                "showBcs": False,
+                "showStorageRebate": True
+            }]
+        }
+        
+        try:
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            if response.status_code == 200:
+                data = response.json().get('result', {}).get('data', {})
+                obj_type = data.get('type', '')
+                if obj_type.startswith("0x2::coin::Coin<0x2::sui::SUI>"):
+                    gas_balance = int(data.get('content', {}).get('fields', {}).get('balance', 0)) / 1_000_000_000
+        except:
+            pass
+    
+    print(f"Your current balances: {utils.format_number(total_balance)}")
     print("-" * 50)
-    utils.get_token_balances()
-    utils.check_gas_balance()
+    print(f"Gas Object Balance: {utils.format_number(gas_balance)}")
     print("=" * 50)
 
 def rewards_menu():
