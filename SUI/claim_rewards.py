@@ -79,9 +79,9 @@ def claim_rewards():
                 
             # Add a small delay between transactions
             if i < len(reward_ids):
-                print("  Waiting 2 seconds before next transaction...")
+                print("  Waiting 5 seconds before next transaction...")
                 import time
-                time.sleep(2)
+                time.sleep(5)
 
         print(f"\n📊 Processing completed:")
         print(f"  ✅ Successful: {successful_count}")
