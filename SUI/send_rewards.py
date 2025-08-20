@@ -132,7 +132,7 @@ def send_rewards_to_address():
         object_id = obj['objectId']
         time.sleep(5)
         gas_object = os.getenv("GAS_OBJECT", "0x0eaef11be6a00b414cac2de32ace7286162845a9d6d013fc2cd53d665c35a85e")
-        command = f"sui client transfer --to {recipient_address} --object-id {object_id} --gas-budget 199800000 --gas {gas_object}"
+        command = f"sui client transfer --to {recipient_address} --object-id {object_id} --gas-budget 10000000 --gas {gas_object}"
         print(f"Sending object {object_id} to {recipient_address}...")
         try:
             command_output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, universal_newlines=True)

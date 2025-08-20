@@ -25,7 +25,7 @@ def vote_for_gas_price():
     
     gas_object = os.getenv("GAS_OBJECT", "0x0eaef11be6a00b414cac2de32ace7286162845a9d6d013fc2cd53d665c35a85e")
 
-    command = f"sui client call --package 0x3 --module sui_system --function request_set_gas_price --args 0x5 {object_cap_id} {gas_price} --gas-budget 199800000 --gas {gas_object}"
+    command = f"sui client call --package 0x3 --module sui_system --function request_set_gas_price --args 0x5 {object_cap_id} {gas_price} --gas-budget 10000000 --gas {gas_object}"
 
     print(f"\nSubmitting gas price vote: {gas_price} MIST")
     print("Executing transaction...")

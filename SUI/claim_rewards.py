@@ -42,7 +42,7 @@ def claim_rewards():
             print(f"  Please set a gas object in the Gas menu first")
             return False
             
-        command = f"sui client call --package 0x3 --module sui_system --function request_withdraw_stake --args 0x5 {reward_id} --gas-budget 199800000 --gas {gas_object}"
+        command = f"sui client call --package 0x3 --module sui_system --function request_withdraw_stake --args 0x5 {reward_id} --gas-budget 10000000 --gas {gas_object}"
         print(f"  Executing withdrawal transaction with gas object: {gas_object[:20]}...")
 
         try:
